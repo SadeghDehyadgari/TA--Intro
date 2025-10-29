@@ -13,7 +13,7 @@ class SlidesManager {
         id: "slide-about",
         title: "About Me",
         content:
-          "I'm a Frontend Developer passionate about creating beautiful and functional web interfaces. With my background in language studies, I bring a unique perspective to teaching technical concepts in an accessible way. I'm here to support your learning journey in web development.",
+          "I'm a Frontend learner passionate about creating beautiful and functional web interfaces. With my background in language studies, I bring a unique perspective to teaching technical concepts in an accessible way. I'm here to support your learning journey in web development.",
       },
       {
         id: "slide-responsibilities",
@@ -44,6 +44,8 @@ class SlidesManager {
       },
     ];
 
+    this.touchStartX = 0;
+    this.touchEndX = 0;
     this.init();
   }
 
@@ -51,6 +53,7 @@ class SlidesManager {
     this.createNavigationDots();
     this.setupEventListeners();
     this.initializeSlidesContent();
+    this.addSwipeHint();
   }
 
   createNavigationDots() {
@@ -89,6 +92,57 @@ class SlidesManager {
         this.router.nextSlide();
       }
     });
+
+    // Touch events for mobile swipe
+    this.setupTouchEvents();
+  }
+
+  setupTouchEvents() {
+    const slidesContainer = document.querySelector(".slides-container");
+
+    slidesContainer.addEventListener(
+      "touchstart",
+      (e) => {
+        this.touchStartX = e.changedTouches[0].screenX;
+      },
+      { passive: true }
+    );
+
+    slidesContainer.addEventListener(
+      "touchend",
+      (e) => {
+        this.touchEndX = e.changedTouches[0].screenX;
+        this.handleSwipe();
+      },
+      { passive: true }
+    );
+  }
+
+  handleSwipe() {
+    const minSwipeDistance = 50; // Minimum distance for a swipe to count
+
+    const swipeDistance = this.touchEndX - this.touchStartX;
+
+    if (Math.abs(swipeDistance) < minSwipeDistance) return;
+
+    if (swipeDistance > 0) {
+      // Swipe right - go to previous slide
+      this.router.prevSlide();
+    } else {
+      // Swipe left - go to next slide
+      this.router.nextSlide();
+    }
+  }
+
+  addSwipeHint() {
+    const welcomeSlide = document.getElementById("slide-welcome");
+    if (welcomeSlide) {
+      const swipeHint = document.createElement("div");
+      swipeHint.className = "swipe-hint";
+      swipeHint.innerHTML =
+        '<div class="swipe-hint-text">Swipe to navigate</div>';
+      welcomeSlide.appendChild(swipeHint);
+    }
   }
 
   initializeSlidesContent() {
